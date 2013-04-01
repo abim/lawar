@@ -9,15 +9,26 @@
 * @since        File available since Release 1.0
 * @category     config
 */
+// Semua path tanpa tanda "/" di akhir
 $BASE_PATH = "/lawar";
-define ("x_BASE", $BASE_PATH); //tanpa /
-define ("x_APPVER", "V1.0-beta");
+$SCRIPTS_PATH = "/Volumes/HD/_WWW/ACTIVE_PROJECTS/PRO";
+define ("x_BASE", $BASE_PATH);
+define ("x_PATH", $SCRIPTS_PATH.$BASE_PATH);
+define ("x_APPVER", "V1.0-dev");
 
-define ("x_IMG", $BASE_PATH."/static/img"); //tanpa /
+define ("x_IMG", $BASE_PATH."/static/img");
 
 
 $SITE_CONF_AUTOLOAD['timezone'] = "Asia/Jakarta";
 $SITE_CONF_AUTOLOAD['ssl'] = "";
 $SITE_CONF_AUTOLOAD['tracking'] = "cookie";
 $SITE_CONF_AUTOLOAD['cookie'] = "x0xcook";
+
+/*
+SIC generate : 
+3 : company
+4 : series
+5 : brands
+6 : products
+*/
 ?>

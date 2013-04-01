@@ -13,7 +13,7 @@
   <hr>
 
   <footer>
-    <p>&copy;2013 Lawar <?php echo x_APPVER;?></p>
+    <p>&copy;2013 Lawar <span class="badge badge-warning"><?php echo x_APPVER;?></span></p>
   </footer>
 
 </div> <!-- /container -->
@@ -21,3 +21,8 @@
     <script src="<?php echo x_BASE;?>/static/js/apps.js"></script>
   </body>
 </html>
+<?php 
+if(isset($sql)) { $sql->db_Close();}
+if(isset($sql2)) { $sql2->db_Close();}
+if(isset($xsql)) { $xsql->db_Close();}
+?>

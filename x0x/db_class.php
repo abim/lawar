@@ -55,11 +55,11 @@ class db{
 		//mode statis (default)
 		if($arg != ""){
 
-			if($this->mySQLresult = @mysql_query("SELECT ".$fields." FROM ".$table." WHERE ".$arg)){
+			if($this->mySQLresult = @mysql_query("SELECT ".$fields." FROM ".$table." ".$arg)){
 				$this->dbError("dbQuery");
 				return $this->db_Rows();
 			}else{
-				$this->dbError("db_Select (SELECT $fields FROM "."$table WHERE $arg)");
+				$this->dbError("db_Select (SELECT $fields FROM "."$table $arg)");
 				return FALSE;
 			}
 		}

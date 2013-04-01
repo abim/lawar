@@ -9,28 +9,30 @@
 * @since        File available since Release 1.0
 * @category     template-landing
 */
-@include ("../x0x/render.php");
-$NODE = "Brands";
-@include ("con.php");
-@include_once ("../header.php");
-@include_once ("../nav.php");
+@include ("../../x0x/render.php");
+$NODE = "Series";
+@include ("../con.php");
+@include ("../../header.php");
+@include ("../../nav.php");
 ?>
+
 <div class="page-header">
-  <h1>Gadget <small><?php echo $NODE;?></small></h1>
+  <h1>Phones <small><?php echo $NODE;?></small></h1>
 </div>
 
 <!-- breadcrumb -->
 <ul class="breadcrumb">
-  <li><i class="icon-home"></i> <a href="../">Home</a> <span class="divider">/</span></li>
-  <li><a href="./">Gadget</a> <span class="divider">/</span></li>
+  <li><i class="icon-home"></i> <a href="../../">Home</a> <span class="divider">/</span></li>
+  <li><a href="../">Gadget</a> <span class="divider">/</span></li>
+  <li><a href="./">Phones</a> <span class="divider">/</span></li>
   <li class="active"><?php echo $NODE;?></li>
 </ul>
 
 <!-- tabs -->
 <ul class="nav nav-tabs">
-  <li><a href="./"><i class="icon-signal"></i> Dashboard</a></li>
-  <li class="active"><a href="brands"><i class="icon-flag"></i> Brands</a></li>
-  <li><a href="#"><i class="icon-certificate"></i> OS</a></li>
+  <li><a href="./"><i class="icon-signal"></i>  Dashboard</a></li>
+  <li><a href="products"><i class="icon-fire"></i> Products</a></li>
+  <li class="active"><a href="series"><i class="icon-th-list"></i> <?php echo $NODE;?></a></li>
 </ul>
 
 <section id="tables">
@@ -43,8 +45,8 @@ $NODE = "Brands";
         <thead>
           <tr>
             <th>#</th>
+            <th>Series</th>
             <th>Brand</th>
-            <th>Vendor</th>
             <th>Type</th>
             <th>Product</th>
             <th>#ID / SIC</th>
@@ -66,26 +68,26 @@ if(!empty($_GET['p'])) {
 }else {$HALAMAN = 0; $CURRENT_PAGE=1;}
 
 $sql -> db_Select(
-  "gadget_brand INNER JOIN company AS b ON gadget_brand.c_company = b.code", 
-  "gadget_brand.id_brand, gadget_brand.code, gadget_brand.name, gadget_brand.c_company, b.name AS company", 
-  "GROUP BY gadget_brand.name LIMIT {$HALAMAN},{$TOTAL_VIEW_PER_HALAMAN}");
+  "gadget_series INNER JOIN gadget_brand AS b ON gadget_series.c_brand = b.code", 
+  "gadget_series.id_series, gadget_series.code, gadget_series.name, gadget_series.c_brand, b.name AS brand", 
+  "GROUP BY gadget_series.name LIMIT ".$HALAMAN.",".$TOTAL_VIEW_PER_HALAMAN."");
 
 $sql2 = new db;
-$sql2 -> db_Select("gadget_brand", "code");
+$sql2 -> db_Select("gadget_series", "id_series");
 $TOTAL_DATA_TERQUERY = $sql2-> db_Rows();
-$mulai_hitung = 1;  
+$mulai_hitung = 1 + ($TOTAL_VIEW_PER_HALAMAN * ($CURRENT_PAGE -1));  
 while($row = $sql-> db_Fetch()){
   $hitung_baris = $mulai_hitung++;
   echo "
   <tr>
     <td>{$hitung_baris}</td>
     <td>{$row['name']}</td>
-    <td>{$row['company']}</td>
+    <td>{$row['brand']}</td>
     <td>0</td>
     <td>0</td>
-    <td><span class=\"label\">{$row['id_brand']}</span> <span class=\"label\">{$row['code']}</span></td>
+    <td><span class=\"label\">{$row['id_series']}</span> <span class=\"label\">{$row['code']}</span></td>
     <td>
-      <a href=\"#edit={$row['id_brand']}\" class=\"btn btn-mini btn-info\"><i class=\"icon-edit\"></i> Edit</a>
+      <a href=\"#edit={$row['id_series']}\" class=\"btn btn-mini btn-info\"><i class=\"icon-edit\"></i> Edit</a>
       <a href=\"#disable\" class=\"btn btn-mini btn-danger disabled\"><i class=\"icon-remove\"></i> Delete</a>
     </td>
   </tr>
@@ -93,10 +95,10 @@ while($row = $sql-> db_Fetch()){
 }
 echo "</tbody></table>";
 
-include_once ("../x0x/np_class.php");
+include_once (x_PATH."/x0x/np_class.php");
 $page = new nextprev;
-$self = preg_replace ('/\/\?p\=(([0-9])*)/','', $_SERVER['REQUEST_URI']);
-$HITUNG_HALAMAN_WEB = $page->PENGATURAN_HALAMAN($self."/?pg=", $CURRENT_PAGE, $TOTAL_VIEW_PER_HALAMAN, $TOTAL_DATA_TERQUERY);
+$self = preg_replace ('/\?p\=(([0-9])*)/','', $_SERVER['REQUEST_URI']);
+$HITUNG_HALAMAN_WEB = $page->PENGATURAN_HALAMAN($self."?p=", $CURRENT_PAGE, $TOTAL_VIEW_PER_HALAMAN, $TOTAL_DATA_TERQUERY);
 if ($HITUNG_HALAMAN_WEB){
   echo "
   <div class=\"pagination pull-right\">
@@ -118,33 +120,36 @@ if ($HITUNG_HALAMAN_WEB){
       <h3 id="pager">New</h3>
 <?php
 if(isset($_POST['FormSubmit']) && !empty($_POST['name'])) {
+  $release_date = date("Y-m-d", strtotime(trim($_POST['release'])));
   $code = createCode();
   $slug = createSlug(trim($_POST['name']));
-  $sql -> db_Insert("gadget_brand", "'0', '".$code."', '".$_POST['name']."', '".$slug."', '".$_POST['c_company']."', '', '0', '' ");
-  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_brand' ");
-  setcookie ("gadget_company_cookie", $_POST['c_company'], (time()-900)); //delete cookie
-  setcookie ("gadget_company_cookie", $_POST['c_company'], (time()+900)); //add cookie
+  $sql -> db_Insert("gadget_series", "'0', '".$code."', '".$_POST['name']."', '".$slug."', '".$_POST['c_brand']."', '".$release_date."', '' ");
+  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_series' ");
+  setcookie ("gadget_series_input_cookie", $_POST['name'].", ".$release_date, (time()+100)); //add cookie
+
+  setcookie ("gadget_brands_cookie", $_POST['c_brand'], (time()-900)); //delete cookie
+  setcookie ("gadget_brands_cookie", $_POST['c_brand'], (time()+900)); //add cookie
   return _redirect ( "?sip" );
 }
 if(x_QUERY == "sip"){
   echo "
     <div class=\"alert alert-success\">
       <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
-      <strong>Sip</strong>.
+      <strong>Sip</strong>. <span class=\"label label-success\">{$_COOKIE['gadget_series_input_cookie']}</span>
     </div>
     ";
+    setcookie ("gadget_series_input_cookie", $_POST['name'], (time()-100)); //add cookie
 }
 ?>
       <form method='post' action='<?php echo x_SELF;?>'>
         <div class="control-group">
-          <label class="control-label" for="c_company">Vendor</label>
+          <label class="control-label" for="c_brand">Brand <?php echo $_COOKIE['gadget_brands_cookie'];?></label>
           <div class="controls">
-            <select id="c_company" name="c_company">
+            <select id="c_brand" name="c_brand">
               <?php
-              $sql -> db_Select("company", "code,name", "GROUP BY name");
+              $sql -> db_Select("gadget_brand", "code,name", "GROUP BY name");
               while($row = $sql-> db_Fetch()){
-                (($_COOKIE['gadget_company_cookie'] == $row['code']) ? $selected = " selected" : $selected = ""); //cookie
-
+                (($_COOKIE['gadget_brands_cookie'] == $row['code']) ? $selected = " selected" : $selected = ""); //cookie
                 echo "<option value=\"{$row['code']}\"{$selected}>{$row['name']}</option>\n";
               }
               ?>
@@ -153,9 +158,15 @@ if(x_QUERY == "sip"){
           </div>
         </div>
         <div class="control-group">
-          <label class="control-label" for="name">Brand Name</label>
+          <label class="control-label" for="name">Series / Family</label>
           <div class="controls">
-            <input type="text" id="name" name="name" placeholder="Brand Name">
+            <input type="text" id="name" name="name" placeholder="Name">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="release">Release Date</label>
+          <div class="controls">
+            <input type="text" id="release" name="release" placeholder="ex: 2012-12-30">
           </div>
         </div>
         <div class="control-group">
@@ -200,6 +211,7 @@ function okClicked () {
   closeDialog ();
   };
 </script>
+
 <?php
-@include ("../footer.php");
+@include ("../../footer.php");
 ?> 

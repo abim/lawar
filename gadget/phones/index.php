@@ -21,7 +21,7 @@ $NODE = "Phones";
 
 <!-- breadcrumb -->
 <ul class="breadcrumb">
-  <li class="active"><i class="icon-home"></i> <a href="../">Home</a> <span class="divider">/</span></li>
+  <li class="active"><i class="icon-home"></i> <a href="../../">Home</a> <span class="divider">/</span></li>
   <li class="active"><a href="../">Gadget</a> <span class="divider">/</span></li>
   <li class="active"><?php echo $NODE;?></li>
 </ul>
@@ -29,202 +29,32 @@ $NODE = "Phones";
 <!-- tabs -->
 <ul class="nav nav-tabs">
   <li class="active"><a href="./"><i class="icon-signal"></i> Dashboard</a></li>
-  <li><a href="seri"><i class="icon-th"></i> Seri</a></li>
+  <li><a href="products"><i class="icon-fire"></i> Products</a></li>
+  <li><a href="series"><i class="icon-th-list"></i> Series</a></li>
 </ul>
 
 <!-- columns -->
 <div class="row">
  <div id="columns">
-    <div class="span100">Samsung
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
+    <?php
+    $sql2 = new db;
+    $sql -> db_Select("gadget_brand", "code,name", "GROUP BY name");
+    while($row = $sql-> db_Fetch()){
+        echo "
+    <div class=\"span100\"><span class=\"btn btn-small btn-info\">".$row['name']."</span>
+      <ul class=\"unstyled\">";
+      $sql2 -> db_Select("gadget_series", "name", "WHERE c_brand='".$row['code']."' ORDER BY release_date DESC");
+      while($row2 = $sql2-> db_Fetch()){
+        echo "
+        <li>├ <span class=\"label label-success\">".$row2['name']."</span></li>";
+      }
+      echo "
       </ul>
     </div>
-    <div class="span100">HTC
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">iPhone
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
-    <div class="span100">bootstrap
-      <ul class="unstyled">
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-        <li>├css</li>
-      </ul>
-    </div>
+        ";
+    }
 
+    ?>
   </div>
 </div>
 <?php

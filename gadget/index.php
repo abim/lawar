@@ -22,7 +22,7 @@ $NODE = "Gadget";
 
 <!-- breadcrumb -->
 <ul class="breadcrumb">
-  <li class="active"><i class="icon-home"></i> <a href="../../">Home</a> <span class="divider">/</span></li>
+  <li class="active"><i class="icon-home"></i> <a href="../">Home</a> <span class="divider">/</span></li>
   <li class="active"><?php echo $NODE;?></li>
 </ul>
 

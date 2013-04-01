@@ -9,27 +9,30 @@
 * @since        File available since Release 1.0
 * @category     template-landing
 */
-@include_once ("x0x/render.php");
-
-$nav="ds";
-$NODE = "Company";
-@include_once ("header.php");
-@include_once ("nav.php");
+@include ("../../x0x/render.php");
+$NODE = "Products";
+@include ("../con.php");
+@include ("../../header.php");
+@include ("../../nav.php");
 ?>
+
 <div class="page-header">
-  <h1>Dashboard <small><?php echo $NODE;?></small></h1>
+  <h1>Phones <small><?php echo $NODE;?></small></h1>
 </div>
 
 <!-- breadcrumb -->
 <ul class="breadcrumb">
-  <li><i class="icon-home"></i> <a href="./">Home</a> <span class="divider">/</span></li>
+  <li><i class="icon-home"></i> <a href="../../">Home</a> <span class="divider">/</span></li>
+  <li><a href="../">Gadget</a> <span class="divider">/</span></li>
+  <li><a href="./">Phones</a> <span class="divider">/</span></li>
   <li class="active"><?php echo $NODE;?></li>
 </ul>
 
 <!-- tabs -->
 <ul class="nav nav-tabs">
-  <li><a href="./"><i class="icon-home"></i> Dashboard</a></li>
-  <li class="active"><a href="company"><i class="icon-flag"></i> <?php echo $NODE;?></a></li>
+  <li><a href="./"><i class="icon-signal"></i>  Dashboard</a></li>
+  <li class="active"><a href="products"><i class="icon-fire"></i> <?php echo $NODE;?></a></li>
+  <li><a href="series"><i class="icon-th-list"></i> Series</a></li>
 </ul>
 
 <section id="tables">
@@ -42,15 +45,15 @@ $NODE = "Company";
         <thead>
           <tr>
             <th>#</th>
-            <th>Company</th>
             <th>Brand</th>
+            <th>Vendor</th>
+            <th>Type</th>
             <th>Product</th>
             <th>#ID / SIC</th>
             <th>action</th>
           </tr>
         </thead>
         <tbody>
-
 <?php
 $TOTAL_VIEW_PER_HALAMAN = 10;
 if(!empty($_GET['p'])) { 
@@ -64,10 +67,13 @@ if(!empty($_GET['p'])) {
   }
 }else {$HALAMAN = 0; $CURRENT_PAGE=1;}
 
-$sql -> db_Select("company", "id_company,name,code", "GROUP BY name LIMIT {$HALAMAN},{$TOTAL_VIEW_PER_HALAMAN}");
+$sql -> db_Select(
+  "gadget_series INNER JOIN gadget_brand AS b ON gadget_series.c_brand = b.code", 
+  "gadget_series.id_series, gadget_series.code, gadget_series.name, gadget_series.id_brand, b.name AS brand", 
+  "GROUP BY gadget_series.name LIMIT {$HALAMAN},{$TOTAL_VIEW_PER_HALAMAN}");
 
 $sql2 = new db;
-$sql2 -> db_Select("company", "code");
+$sql2 -> db_Select("gadget_series", "code");
 $TOTAL_DATA_TERQUERY = $sql2-> db_Rows();
 $mulai_hitung = 1;  
 while($row = $sql-> db_Fetch()){
@@ -76,11 +82,12 @@ while($row = $sql-> db_Fetch()){
   <tr>
     <td>{$hitung_baris}</td>
     <td>{$row['name']}</td>
+    <td>{$row['brand']}</td>
     <td>0</td>
     <td>0</td>
-    <td><span class=\"label\">{$row['id_company']}</span> <span class=\"label\">{$row['code']}</span></td>
+    <td><span class=\"label\">{$row['id_brand']}</span> <span class=\"label\">{$row['code']}</span></td>
     <td>
-      <a href=\"#edit={$row['id_company']}\" class=\"btn btn-mini btn-info\"><i class=\"icon-edit\"></i> Edit</a>
+      <a href=\"#edit={$row['id_series']}\" class=\"btn btn-mini btn-info\"><i class=\"icon-edit\"></i> Edit</a>
       <a href=\"#disable\" class=\"btn btn-mini btn-danger disabled\"><i class=\"icon-remove\"></i> Delete</a>
     </td>
   </tr>
@@ -88,7 +95,7 @@ while($row = $sql-> db_Fetch()){
 }
 echo "</tbody></table>";
 
-include_once ("x0x/np_class.php");
+include_once (x_PATH."/x0x/np_class.php");
 $page = new nextprev;
 $self = preg_replace ('/\/\?p\=(([0-9])*)/','', $_SERVER['REQUEST_URI']);
 $HITUNG_HALAMAN_WEB = $page->PENGATURAN_HALAMAN($self."/?pg=", $CURRENT_PAGE, $TOTAL_VIEW_PER_HALAMAN, $TOTAL_DATA_TERQUERY);
@@ -102,24 +109,11 @@ if ($HITUNG_HALAMAN_WEB){
   ";
 }
 ?>
-      <!--
-      <div class="pagination pull-right">
-        <ul>
-          <li><a href="#">Prev</a></li>
-          <li class="active"><a href="#">1</a></li>
-          <li><a href="#">2</a></li>
-          <li><a href="#">3</a></li>
-          <li><a href="#">4</a></li>
-          <li><a href="#">5</a></li>
-          <li><a href="#">Next</a></li>
-        </ul>
-      </div>-->
       <ul>
         <li>[=] pagination</li>
         <li>[+] edit</li>
         <li>[+] delete</li>
       </ul>
-
     </div>
 
     <div class="span4">
@@ -128,8 +122,8 @@ if ($HITUNG_HALAMAN_WEB){
 if(isset($_POST['FormSubmit']) && !empty($_POST['name'])) {
   $code = createCode();
   $slug = createSlug(trim($_POST['name']));
-  $sql -> db_Insert("company", "'0', '".$code."', '".$_POST['name']."', '".$slug."', '".$_POST['weblink']."' ");
-  $sql -> db_Insert("codebank", "'0', '".$code."', 'company' ");
+  $sql -> db_Insert("gadget_series", "'0', '".$code."', '".$_POST['name']."', '".$slug."', '".$_POST['id_brand']."', '' ");
+  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_series' ");
   return _redirect ( "?sip" );
 }
 if(x_QUERY == "sip"){
@@ -143,15 +137,25 @@ if(x_QUERY == "sip"){
 ?>
       <form method='post' action='<?php echo x_SELF;?>'>
         <div class="control-group">
-          <label class="control-label" for="name">Company Name</label>
+          <label class="control-label" for="id_brand">Brand</label>
           <div class="controls">
-            <input type="text" id="name" name="name" placeholder="Company Name">
+            <select id="id_brand" name="id_brand">
+              <option selected="selected">Select</option>
+              <?php
+              $sql -> db_Select("gadget_brand", "id_brand,name", "GROUP BY name");
+              while($row = $sql-> db_Fetch()){
+                echo "<option value=\"{$row['id_brand']}\">{$row['name']}</option>\n";
+              }
+              ?>
+            </select>
+            <span class="help-inline"><a href="<?php echo x_BASE;?>/gadget/brands" data-toggle="modal"> <i class="icon-plus-sign"></i></a></span>
           </div>
         </div>
+        <div id="ajax_select_series"></div>
         <div class="control-group">
-          <label class="control-label" for="weblink">Website</label>
+          <label class="control-label" for="name">Product</label>
           <div class="controls">
-            <input type="text" id="weblink" name="weblink" placeholder="tanpa http://">
+            <input type="text" id="name" name="name" placeholder="Product Name">
           </div>
         </div>
         <div class="control-group">
@@ -165,6 +169,25 @@ if(x_QUERY == "sip"){
   </div>
 </section>
 
+<script type="text/javascript">
+$(document).ready(function() {
+  $("#id_brand").change(function() { 
+    var id=$(this).val();
+    var dataString = 'id_brand='+ id;
+
+    $.ajax({
+      type: "GET",
+      url: "ajax_select_brand.php",
+      data: dataString,
+      cache: false,
+      success: function(html){
+        $("#ajax_select_series").html(html);
+      } 
+    });
+  });
+});
+</script>
+
 <?php
-@include ("footer.php");
-?>
+@include ("../../footer.php");
+?> 

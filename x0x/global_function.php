@@ -45,7 +45,7 @@ function cek_session(){
             define("TEKSLOGIN", "Terdeteksi Kesalahan cookie Pada Komputer anda - Keluar Account User.<br /><br />");
             return(FALSE);
         }
-        if($sql -> db_Select("users", "*", "id_user='$uid' AND md5(userpass)='$upw'")){
+        if($sql -> db_Select("users", "*", "WHERE id_user='$uid' AND md5(userpass)='$upw'")){
             $result = $sql -> db_Fetch(); extract($result);
             define("USER", TRUE);
 
@@ -94,16 +94,25 @@ function isicookie($name, $value, $expire, $path="/", $domain="", $secure=0){
         setcookie($name, $value, $expire, $path, $domain, $secure);
 }
 
-function createCode(){
+function createCode($panjangCode="2"){
     $code = '';
-    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890';
+    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789';
     $JumlahKarakter = strlen($chars)-1; 
     
-    for($i = 0 ; $i < 10 ; $i++){
+    for($i = 0 ; $i < $panjangCode ; $i++){
         $code .= $chars[rand(0,$JumlahKarakter)];
     }
-    $code_checkin = $code;
-    return $code_checkin;
+    return cekCode($code,1);
+}
+
+function cekCode($str,$create="") {
+    global $sql;
+    $sql -> db_Select("codebank", "code", "WHERE code='{$str}'");
+    if($sql -> db_Rows()) {
+        //hanya ngecek
+        if($create) { return createCode();}
+        else {return false;}
+    }else {return $str;}    
 }
 
 function removeAccent($str) {
@@ -116,11 +125,12 @@ function createSlug($str) {
     return strtolower(preg_replace(array('/[^a-zA-Z0-9 -]/', '/[ -]+/', '/^-|-$/'), array('', '-', ''), removeAccent($str)));
 }
 
-function cekCode($str) {
-    global $sql;
-    $sql -> db_Select("codebank", "code", "code='{$str}'");
-    if($sql -> db_Rows()) {
-        return createCode();
-    }else {return $str;}
+function _redirect ( $link ) {
+    if ($link == "NYASAR") { 
+        echo "<script type='text/javascript'>document.location.href='". x_BASE ."#SECURITY_WARNING/".USERNAME."=nyasar?'</script>\n";
+    } else {
+        echo "<script type='text/javascript'>document.location.href='". $link ."'</script>\n";
+    }
 }
+
 ?>
