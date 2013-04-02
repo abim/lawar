@@ -18,7 +18,7 @@
 
 </div> <!-- /container -->
     <script src="<?php echo x_BASE;?>/static/js/bootstrap.min.js"></script>
-    <script src="<?php echo x_BASE;?>/static/js/apps.js"></script>
+    <!--<script src="<?php echo x_BASE;?>/static/js/apps.js"></script>-->
   </body>
 </html>
 <?php 

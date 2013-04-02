@@ -10,7 +10,7 @@
 * @category     template-landing
 */
 @include ("../../x0x/render.php");
-$NODE = "Series";
+$NODE = "Model";
 @include ("../con.php");
 @include ("../../header.php");
 @include ("../../nav.php");
@@ -32,8 +32,8 @@ $NODE = "Series";
 <ul class="nav nav-tabs">
   <li><a href="./"><i class="icon-signal"></i>  Dashboard</a></li>
   <li><a href="products"><i class="icon-fire"></i> Products</a></li>
-  <li><a href="model"><i class="icon-th-list"></i> Model</a></li>
-  <li class="active"><a href="series"><i class="icon-tags"></i> <?php echo $NODE;?></a></li>
+  <li class="active"><a href="model"><i class="icon-th-list"></i> <?php echo $NODE;?></a></li>
+  <li><a href="series"><i class="icon-tags"></i> Series</a></li>
 </ul>
 
 <section id="tables">
@@ -71,10 +71,10 @@ if(!empty($_GET['p'])) {
 $sql -> db_Select(
   "gadget_model_series INNER JOIN gadget_brand AS b ON gadget_model_series.c_brand = b.code", 
   "gadget_model_series.id_ms, gadget_model_series.code, gadget_model_series.name, gadget_model_series.c_brand, b.name AS brand", 
-  "WHERE gadget_model_series.type='series' GROUP BY gadget_model_series.name LIMIT ".$HALAMAN.",".$TOTAL_VIEW_PER_HALAMAN."");
+  "WHERE gadget_model_series.type='model' GROUP BY gadget_model_series.name LIMIT ".$HALAMAN.",".$TOTAL_VIEW_PER_HALAMAN."");
 
 $sql2 = new db;
-$sql2 -> db_Select("gadget_model_series", "id_ms", "WHERE type='series'");
+$sql2 -> db_Select("gadget_model_series", "id_ms", "WHERE type='model'");
 $TOTAL_DATA_TERQUERY = $sql2-> db_Rows();
 $mulai_hitung = 1 + ($TOTAL_VIEW_PER_HALAMAN * ($CURRENT_PAGE -1));  
 while($row = $sql-> db_Fetch()){
@@ -123,12 +123,14 @@ if(isset($_POST['FormSubmit']) && !empty($_POST['name'])) {
   $release_date = date("Y-m-d", strtotime(trim($_POST['release'])));
   $code = createCode();
   $slug = createSlug(trim($_POST['name']));
-  $sql -> db_Insert("gadget_model_series", "'0', '".$code."', '".$_POST['name']."', '".$slug."','series', '', '".$_POST['c_brand']."', '".$release_date."', '' ");
-  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_model_series' ");
+  $sql -> db_Insert("gadget_model_series", "'0', '".$code."', '".$_POST['name']."', '".$slug."', 'model', '".$_POST['c_series']."', '".$_POST['c_brand']."', '".$release_date."', '' ");
+  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_model' ");
   setcookie ("gadget_series_input_cookie", $_POST['name'].", ".$release_date, (time()+100)); //add cookie
 
   setcookie ("gadget_brands_cookie", $_POST['c_brand'], (time()-900)); //delete cookie
   setcookie ("gadget_brands_cookie", $_POST['c_brand'], (time()+900)); //add cookie
+  setcookie ("gadget_series_cookie", $_POST['c_series'], (time()-900)); //delete cookie
+  setcookie ("gadget_series_cookie", $_POST['c_series'], (time()+900)); //add cookie
   return _redirect ( "?sip" );
 }
 if(x_QUERY == "sip"){
@@ -157,10 +159,11 @@ if(x_QUERY == "sip"){
             <span class="help-inline"><a href="#windowTitleDialog" data-toggle="modal"> <i class="icon-plus-sign"></i></a></span>
           </div>
         </div>
+        <div id="ajax_select_series"></div>
         <div class="control-group">
-          <label class="control-label" for="name">Series / Family</label>
+          <label class="control-label" for="name">Model</label>
           <div class="controls">
-            <input type="text" id="name" name="name" placeholder="Name">
+            <input type="text" id="name" name="name" placeholder="ex: Z10">
           </div>
         </div>
         <div class="control-group">
@@ -196,6 +199,29 @@ if(x_QUERY == "sip"){
   </div>
 </div>
 
+<script type="text/javascript">
+$(document).ready(function() {
+  $("#c_brand").change(function() { 
+    var id=$(this).val();
+    var dataString = 'c_brand='+ id;
+
+    $.ajax({
+      type: "GET",
+      url: "ajax_select_series.php",
+      data: dataString,
+      cache: false,
+      success: function(html){
+        $("#ajax_select_series").html(html);
+      } 
+
+    });
+  });
+});
+
+$(document).ready(function() {  
+    $('#c_brand').change();
+});
+</script>
 
 <script type="text/javascript">
 $(document).ready(function() {

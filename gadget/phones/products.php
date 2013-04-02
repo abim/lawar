@@ -30,9 +30,16 @@ $NODE = "Products";
 
 <!-- tabs -->
 <ul class="nav nav-tabs">
-  <li><a href="./"><i class="icon-signal"></i>  Dashboard</a></li>
-  <li class="active"><a href="products"><i class="icon-fire"></i> <?php echo $NODE;?></a></li>
-  <li><a href="series"><i class="icon-th-list"></i> Series</a></li>
+  <li><a href="./"><i class="icon-signal"></i> Dashboard</a></li>
+  <li class="dropdown active">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-fire"></i> <?php echo $NODE;?> <b class="caret"></b></a>
+    <ul class="dropdown-menu">
+      <li class="active"><a href="products"><i class="icon-list-alt"></i> List</a></li>
+      <li><a href="#"><i class="icon-star"></i> Prioritas</a></li>
+    </ul>
+  </li>
+  <li><a href="model"><i class="icon-th-list"></i> Model</a></li>
+  <li><a href="series"><i class="icon-tags"></i> Series</a></li>
 </ul>
 
 <section id="tables">
@@ -68,12 +75,12 @@ if(!empty($_GET['p'])) {
 }else {$HALAMAN = 0; $CURRENT_PAGE=1;}
 
 $sql -> db_Select(
-  "gadget_series INNER JOIN gadget_brand AS b ON gadget_series.c_brand = b.code", 
-  "gadget_series.id_series, gadget_series.code, gadget_series.name, gadget_series.id_brand, b.name AS brand", 
-  "GROUP BY gadget_series.name LIMIT {$HALAMAN},{$TOTAL_VIEW_PER_HALAMAN}");
+  "gadget_product", 
+  "id_product, name, code, c_model", 
+  "GROUP BY release_date LIMIT {$HALAMAN},{$TOTAL_VIEW_PER_HALAMAN}");
 
 $sql2 = new db;
-$sql2 -> db_Select("gadget_series", "code");
+$sql2 -> db_Select("gadget_product", "code");
 $TOTAL_DATA_TERQUERY = $sql2-> db_Rows();
 $mulai_hitung = 1;  
 while($row = $sql-> db_Fetch()){
@@ -82,13 +89,12 @@ while($row = $sql-> db_Fetch()){
   <tr>
     <td>{$hitung_baris}</td>
     <td>{$row['name']}</td>
-    <td>{$row['brand']}</td>
+    <td>{$row['model']}</td>
     <td>0</td>
     <td>0</td>
-    <td><span class=\"label\">{$row['id_brand']}</span> <span class=\"label\">{$row['code']}</span></td>
+    <td><span class=\"label\">{$row['id_product']}</span> <span class=\"label\">{$row['code']}</span></td>
     <td>
-      <a href=\"#edit={$row['id_series']}\" class=\"btn btn-mini btn-info\"><i class=\"icon-edit\"></i> Edit</a>
-      <a href=\"#disable\" class=\"btn btn-mini btn-danger disabled\"><i class=\"icon-remove\"></i> Delete</a>
+      <a href=\"#edit={$row['id_product']}\" class=\"btn btn-mini btn-info\"><i class=\"icon-edit\"></i> Edit</a>
     </td>
   </tr>
   ";
@@ -117,50 +123,89 @@ if ($HITUNG_HALAMAN_WEB){
     </div>
 
     <div class="span4">
-      <h3 id="pager">New</h3>
+      <h3 id="pager">New <?php echo $NODE;?></h3>
 <?php
 if(isset($_POST['FormSubmit']) && !empty($_POST['name'])) {
+  $release_date = date("Y-m-d", strtotime(trim($_POST['release'])));
   $code = createCode();
   $slug = createSlug(trim($_POST['name']));
-  $sql -> db_Insert("gadget_series", "'0', '".$code."', '".$_POST['name']."', '".$slug."', '".$_POST['id_brand']."', '' ");
-  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_series' ");
+
+  $sql -> db_Insert("gadget_product", "'0', '".$code."', '".$_POST['c_series']."', '".$_POST['c_brand']."', '".trim($_POST['c_model'])."', '".trim($_POST['name'])."', '".$slug."', '".$_POST['desc']."', '".$release_date."', 'pending', '0', '' ");
+  $sql -> db_Insert("users_prioritas", "'0', '".$_POST['users_prioritas']."', '".$code."', 'gadget_product' ");
+  $sql -> db_Insert("codebank", "'0', '".$code."', 'gadget_product' ");
+  setcookie ("gadget_series_input_cookie", $_POST['name'].", ".$release_date, (time()+100)); //add cookie
+
+  setcookie ("gadget_brands_cookie", $_POST['c_brand'], (time()-900)); //delete cookie
+  setcookie ("gadget_brands_cookie", $_POST['c_brand'], (time()+900)); //add cookie
+  setcookie ("gadget_series_cookie", $_POST['c_series'], (time()-900)); //delete cookie
+  setcookie ("gadget_series_cookie", $_POST['c_series'], (time()+900)); //add cookie
+  setcookie ("gadget_model_cookie", $_POST['c_model'], (time()-900)); //delete cookie
+  setcookie ("gadget_model_cookie", $_POST['c_model'], (time()+900)); //add cookie
+
   return _redirect ( "?sip" );
 }
 if(x_QUERY == "sip"){
   echo "
     <div class=\"alert alert-success\">
       <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>
-      <strong>Sip</strong>.
+      <strong>Success</strong>. <span class=\"label label-success\">{$_COOKIE['gadget_series_input_cookie']}</span>
     </div>
     ";
+    setcookie ("gadget_series_input_cookie", $_POST['name'], (time()-100)); //delete cookie
 }
 ?>
       <form method='post' action='<?php echo x_SELF;?>'>
         <div class="control-group">
-          <label class="control-label" for="id_brand">Brand</label>
+          <label class="control-label" for="c_brand">Brand</label>
           <div class="controls">
-            <select id="id_brand" name="id_brand">
+            <select id="c_brand" name="c_brand">
               <option selected="selected">Select</option>
               <?php
-              $sql -> db_Select("gadget_brand", "id_brand,name", "GROUP BY name");
+              $sql -> db_Select("gadget_brand", "code,name", "GROUP BY name");
               while($row = $sql-> db_Fetch()){
-                echo "<option value=\"{$row['id_brand']}\">{$row['name']}</option>\n";
+                (($_COOKIE['gadget_brands_cookie'] == $row['code']) ? $selected = " selected" : $selected = ""); //cookie
+                echo "<option value=\"{$row['code']}\"{$selected}>{$row['name']}</option>\n";
               }
               ?>
             </select>
             <span class="help-inline"><a href="<?php echo x_BASE;?>/gadget/brands" data-toggle="modal"> <i class="icon-plus-sign"></i></a></span>
           </div>
         </div>
+
         <div id="ajax_select_series"></div>
+
         <div class="control-group">
           <label class="control-label" for="name">Product</label>
           <div class="controls">
-            <input type="text" id="name" name="name" placeholder="Product Name">
+            <input type="text" id="name" name="name" placeholder="ex: Blackberry Z10">
           </div>
         </div>
         <div class="control-group">
+          <label class="control-label" for="release">Release Date</label>
           <div class="controls">
-            <button type="submit" name="FormSubmit" value="submit" class="btn">Add New</button>
+            <input type="text" id="release" name="release" placeholder="ex: 2012-12-30">
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="control-label" for="desc">Simple Desc</label>
+          <div class="controls">
+            <textarea type="text" id="desc" name="desc"></textarea>
+          </div>
+        </div>
+        <div class="control-group">
+          <label class="radio inline">
+            <input type="radio" name="users_prioritas" id="users_prioritas" value="urgent"><span class="label label-important">Urgent</span>
+          </label>
+          <label class="radio inline">
+            <input type="radio" name="users_prioritas" id="users_prioritas" value="normal" checked><span class="label label-success">Normal</span>
+          </label>
+          <label class="radio inline">
+            <input type="radio" name="users_prioritas" id="users_prioritas" value="low"><span class="label">Low</span>
+          </label>
+        </div>
+        <div class="control-group">
+          <div class="controls pull-right"><p>&nbsp;</p>
+            <button type="submit" name="FormSubmit" value="submit" class="btn btn-large btn-primary">Add New</button>
           </div>
         </div>
       </form>
@@ -171,20 +216,26 @@ if(x_QUERY == "sip"){
 
 <script type="text/javascript">
 $(document).ready(function() {
-  $("#id_brand").change(function() { 
+  $("#c_brand").change(function() { 
     var id=$(this).val();
-    var dataString = 'id_brand='+ id;
+    var dataString = 'c_brand='+ id;
 
     $.ajax({
       type: "GET",
-      url: "ajax_select_brand.php",
+      url: "ajax_select_series_model.php",
       data: dataString,
       cache: false,
+      async: false,
       success: function(html){
         $("#ajax_select_series").html(html);
-      } 
+      }
     });
   });
+});
+
+$(document).ready(function() {  
+    $('#c_brand').change();
+
 });
 </script>
 
